@@ -1,0 +1,43 @@
+#!/usr/local/quartus-12.0/quartus/bin/quartus_stp
+#
+# $Id: mem_write.tcl,v 1.1 2011-08-23 22:23:44+09 knish Exp $
+#
+
+if { $argc != 2 } {
+	return -code error "Usage: $argv0 <instance_name> <file_name>"
+}
+
+set instance_name [lindex $argv 0]
+set file_name [lindex $argv 1]
+
+if { [string match "*.mif" $file_name] } {
+	set file_type "mif"
+} elseif { [string match "*.hex" $file_name] } {
+	set file_type "hex"
+} else {
+	return -code error "$argv0: Irregular file type."
+}
+
+########
+
+set hardware [lindex [get_hardware_names] 0]
+puts "hardware : $hardware"
+
+set device [lindex [get_device_names -hardware_name $hardware] 0]
+puts "device   : $device"
+
+foreach instance [get_editable_mem_instances -hardware_name $hardware -device_name $device] {
+	if { [string match  $instance_name [lindex $instance 5]]} {
+		puts "instance : $instance"
+		set index [lindex $instance 0]
+		break
+	}
+}
+
+########
+
+begin_memory_edit -hardware_name $hardware -device_name $device
+
+update_content_to_memory_from_file -instance_index $index -mem_file_path $file_name -mem_file_type $file_type
+
+end_memory_edit

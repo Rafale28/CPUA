@@ -1,0 +1,7 @@
+#include "SWI.inc"
+
+module SWI {
+	reg rSW[8]=0;
+	rSW:=sw;
+	q={8'b0,rSW};
+}

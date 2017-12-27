@@ -1,0 +1,26 @@
+#include "HEXD.inc"
+
+module HEXD {
+	reg r0[4]=0;
+	reg r1[4]=0;
+	reg r2[4]=0;
+	reg r3[4]=0;
+	reg r4[4]=0;
+	reg r5[4]=0;
+	hex0=r0;
+	hex1=r1;
+	hex2=r2;
+	hex3=r3;
+	hex4=r4;
+	hex5=r5;
+	func wren {
+		any {
+			address==0:r0:=data[3:0];
+			address==1:r1:=data[3:0];
+			address==2:r2:=data[3:0];
+			address==3:r3:=data[3:0];
+			address==4:r4:=data[3:0];
+			address==5:r5:=data[3:0];
+		}
+	}
+}

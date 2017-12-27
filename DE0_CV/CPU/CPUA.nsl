@@ -1,0 +1,147 @@
+#include "CPUA.inc"
+#define XLEN 15
+#define SRL 0xB
+#define SLL 0xC
+
+module ALU {
+	SHIFT16 sft;
+	wire res[16];
+	func exe {
+		alt {
+			Fn==0x0:res=0;
+			Fn==0x1:res=(inA);
+			Fn==0x2:res=(inB);
+			Fn==0x3:res=(~inA);
+			Fn==0x4:res=(~inB);
+			Fn==0x5:res=(inA & inB);
+			Fn==0x6:res=(inA | inB);
+			Fn==0x7:res=(inA ^ inB);
+			Fn==0x8:res=(inA + inB)[15:0];
+			Fn==0x9:res=(inA - inB)[15:0];
+			Fn==0xA:res=(inA * inB)[15:0];
+			Fn==0xB:res=(sft.exe(inA,inB[3:0],Fn,1))[15:0];
+			Fn==0xC:res=(sft.exe(inA,inB[3:0],Fn,1))[15:0];
+			Fn==0xD:res=(sft.exe(inA,inB[3:0],0xB,0))[15:0];
+			Fn==0xE:res=(sft.exe(inA,inB[3:0],0xC,0))[15:0];
+			Fn==0xF:res=0;
+		}
+	}
+	outY = res;
+	if (res==0)
+		outZ = 1;
+	else
+		outZ = 0;
+}
+module CPUA {
+	ALU alu0;
+	CLA16 cla;
+	reg PC[16]=0;
+	reg OP[16]=0;
+	reg IM[16]=0;
+	reg ST[16]=0;
+	reg rA[16]=0;
+	reg rZ=0;
+	reg HLT=0;
+
+	proc_name ifetch (PC);
+	proc_name decode (OP);
+	proc_name memread (IM);
+	proc_name execution (IM);
+
+//////////debug signal///////////////////////////////////	
+	cpuen = ~ifetch & ~decode & ~memread & ~execution;
+	pc=PC;
+	op=OP;
+	im=IM;
+	st=ST;
+	ra=rA;
+/////////////////////////////////////////////////////////
+	func start{
+		if (~ifetch & ~decode & ~memread & ~execution)
+			ifetch(datai);
+	}
+	
+	func hlt {
+		HLT:=1;
+	}
+	proc ifetch {
+		decode(memory_read(PC));	
+		PC:=cla.exe(PC);
+	}
+	proc decode {
+		if (OP==0 || HLT==1) {
+			HLT:=0;
+			finish();
+		}else if (OP[15])
+			memread(memory_read(PC));
+		else
+			execution(memory_read(PC));	
+		PC:=cla.exe(PC);
+	}
+	proc memread {
+		execution(memory_read(IM));
+	}
+	proc execution {
+		wire jmp[16];
+		alt {
+			OP[14:12]==3'h1:{rA:=alu0.exe(OP[3:0],rA,IM);rZ:=alu0.outZ;}
+			OP[14:12]==3'h2:{
+				alt {
+					OP[11:4]==0x00:jmp=IM;
+					OP[11:4]==0x10:{if(rZ)jmp=IM;else jmp=PC;}
+					OP[11:4]==0x01:{jmp=IM;ST:=PC;}
+				}
+				PC:=jmp;
+			}
+			OP[14:12]==3'h3:memory_write(IM,rA);
+			OP[14:12]==3'h4:PC:=ST;
+		}
+		ifetch();
+	}
+}
+module SHIFT16 {
+	wire s0[16];
+	wire s1[16];
+	wire s2[16];
+	wire s3[16];
+	func exe {
+		if (b[0]) {
+			alt {
+				c==SLL:s0 = a << 1;
+				c==SRL:{if (flag) s0 = 16#(a>>1)[XLEN-1:0]; else s0 = a >> 1;}
+			}
+		} else {
+			s0=a;
+		}
+		if (b[1]) {
+			alt {
+				c==SLL:s1 = s0 << 2;
+				c==SRL:{if (flag) s1 = 16#(s0>>2)[XLEN-2:0]; else s1 = s0 >> 2;}
+			}
+		} else {
+			s1=s0;
+		}
+		if (b[2]) {
+			alt {
+				c==SLL:s2 = s1 << 4;
+				c==SRL:{if (flag) s2 = 16#(s1>>4)[XLEN-4:0]; else s2 = s1 >> 4;}
+			}
+		} else {
+			s2=s1;
+		}
+		if (b[3]) {
+			alt {
+				c==SLL:s3 = s2 << 8;
+				c==SRL:{if (flag) s3 = 16#(s2>>8)[XLEN-8:0]; else s3 = s2 >> 8;}
+			}
+		} else {
+			s3=s2;
+		}
+		return s3;
+	}
+}
+module CLA16 {
+	func exe {
+		return a + 0x01;
+	}
+}

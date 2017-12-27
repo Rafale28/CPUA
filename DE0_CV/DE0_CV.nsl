@@ -1,0 +1,92 @@
+#include "imem.inc"
+#include "HEX.inc"
+#include "HEXD.inc"
+#include "CPUA.inc"
+#include "SWI.inc"
+#include "LED.inc"
+
+#define BASE_IMEM	16'h0000
+#define SPACE_IMEM	12	
+#define BASE_KEY	16'hA000
+#define SPACE_KEY	0
+#define BASE_SW		16'hA002
+#define SPACE_SW	0
+#define BASE_LED	16'hA004
+#define SPACE_LED	0
+#define BASE_HEX	16'hA008
+#define SPACE_HEX	3
+
+declare DE0_CV {
+	input	KEY[4];
+	input 	SW[10];
+	output	HEX0[7];
+	output	HEX1[7];
+	output	HEX2[7];
+	output	HEX3[7];
+	output	HEX4[7];
+	output	HEX5[7];
+	output	LEDR[10];
+	output	GPIO_0[36];
+	output	GPIO_1[36];
+}
+
+module DE0_CV {
+	CPUA cpu0;
+	SWI	 sw0;
+	LED	 led0;
+	HEXD hexd0;
+	imem imem0;
+	HEX hex0,hex1,hex2,hex3,hex4,hex5;
+	reg r0[7], r1[7], r2[7], r3[7], r4[7], r5[7];
+	reg sw[2]=2'b11;
+	wire cpudata[16];
+	func_self read_imem();
+	func_self read_sw();
+
+	imem0.clock = ~m_clock;
+	sw:={sw[0],KEY[0]};
+	if (sw==2'b10) {
+		cpu0.start(0x0000);
+	}
+
+	sw0.sw=SW[7:0];
+	func cpu0.readmem any {
+		cpu0.adrs[15:SPACE_IMEM] == (BASE_IMEM>>SPACE_IMEM)[15-SPACE_IMEM:0] : read_imem();
+		cpu0.adrs[15:SPACE_SW] == (BASE_SW>>SPACE_SW)[15-SPACE_SW:0] : read_sw();
+	}
+	func cpu0.writemem any{
+		cpu0.adrs[15:SPACE_IMEM] ==(BASE_IMEM>>SPACE_IMEM)[15-SPACE_IMEM:0] : 
+					{imem0.wren(cpu0.adrs[SPACE_IMEM-1:0],cpu0.datao);}
+		cpu0.adrs[15:SPACE_LED] ==(BASE_LED>>SPACE_LED)[15-SPACE_LED:0] : 
+					{led0.wren(cpu0.datao);}
+		cpu0.adrs[15:SPACE_HEX] ==(BASE_HEX>>SPACE_HEX)[15-SPACE_HEX:0] : 
+					{hexd0.wren((cpu0.adrs - BASE_HEX)[SPACE_HEX-1:0] ,cpu0.datao);}
+	}
+	func read_imem {
+		imem0.address = cpu0.adrs;
+		cpu0.datai=imem0.q;
+	}
+	func read_sw {
+		cpu0.datai=sw0.q;
+	}
+
+	r0 := hex0.trans(hexd0.hex0)[6:0];
+	r1 := hex1.trans(hexd0.hex1)[6:0];
+	r2 := hex2.trans(hexd0.hex2)[6:0];
+	r3 := hex3.trans(hexd0.hex3)[6:0];
+	r4 := hex4.trans(hexd0.hex4)[6:0];
+	r5 := hex5.trans(hexd0.hex5)[6:0];
+	HEX0 = r0;
+	HEX1 = r1;
+	HEX2 = r2;
+	HEX3 = r3;
+	HEX4 = r4;
+	HEX5 = r5;
+
+	LEDR = {1'b0,led0.led,cpu0.cpuen};
+	
+	GPIO_0 = {36'h0};
+	GPIO_1 = {36'h0};
+
+}
+

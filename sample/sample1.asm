@@ -1,0 +1,6 @@
+LDA #2
+ADA #3
+STA #100
+LDA #5
+ADA 100
+HALT

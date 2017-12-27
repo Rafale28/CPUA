@@ -1,0 +1,81 @@
+#include "CPUA.inc"
+#define MAXSIM 1000
+
+declare CPUA_sim simulation{}
+declare ram interface{
+	input adrs[16];
+	input	datai[16];
+	output datao[16];
+	func_in read(adrs):datao;
+	func_in write(adrs,datai);
+	input m_clock, p_reset;
+}
+module ram {
+	mem mcell[65535][16];
+	reg datar[16];
+	datar := mcell[adrs];
+	func read datao = datar;
+	func write mcell[adrs] := datai;
+
+	_readmemh("../program.hex",mcell);
+}
+module CPUA_sim {
+	CPUA cpu;
+	ram mem1;
+	reg clocks[20]=0;
+	proc_name upclk();
+
+	mem1.m_clock = ~m_clock;
+	mem1.p_reset = p_reset;
+
+	//func cpu.memory_read return mem1.read(cpu.imaddr);
+	//func cpu.memory_write mem1.write(cpu.imaddr,cpu.wdata);
+	func cpu.memory_read return mem1.read(cpu.adrs);
+	func cpu.memory_write mem1.write(cpu.adrs,cpu.datao);
+
+	proc upclk {
+		clocks++;
+		if (clocks > MAXSIM){finish(); _finish();}
+	}
+	_init {
+		;
+		;
+		cpu.start(0x0000);
+		;
+		clocks:=0;
+		{upclk();}
+	}
+}	
+	
+	
+//	lecture 13
+//	mem imem[128][16] = {
+//		0x1002,2,	
+//		0x3000,100,
+//		0x1002,0x0000,
+//		0x3000,101,
+//		0x9002,100,
+//		0x1009,1,
+//		0x2102,22,
+//		0x3000,100,
+//		0x9008,101,
+//		0x3000,101,
+//		0x2002,8,
+//		0x0000,0
+//	};	
+
+//	lecture 15
+//	mem imem[128][16] = {
+//		0x9002,20,		//0,1	
+//		0x3000,100,		//2,1	
+//		0x1002,2,		//4,1	
+//		0x2012,10,		//6,1	
+//		0x0000,0,		//8,1	
+//		0x9009,100,		//10,1	
+//		0x4000,0,		//12,1	
+//		0x0000,0,		//14,1	
+//		0x0000,0,		//16,1	
+//		0x0000,0,		//18,1	
+//		0x0004,0,		//20,1	
+//		0x0000,0		//22,1	
+//	};	

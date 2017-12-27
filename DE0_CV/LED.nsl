@@ -1,0 +1,9 @@
+#include "LED.inc"
+
+module LED {
+	reg rLED[8]=0;
+	led=rLED;
+	func wren {
+		rLED:=data[7:0];
+	}
+}
