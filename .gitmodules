@@ -1,0 +1,3 @@
+[submodule "assembler"]
+	path = assembler
+	url = git@github.com:RollMan/processor-5-assembler.git
