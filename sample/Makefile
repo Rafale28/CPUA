@@ -1,5 +1,5 @@
 SRCDIR=.
-ASMDIR=$(SRCDIR)/../processor-5-assembler/obj
+ASMDIR=$(SRCDIR)/../assembler/obj
 CPUDIR=$(SRCDIR)/../DE0_CV/
 ASM=$(ASMDIR)/assembler
 %.sim:
