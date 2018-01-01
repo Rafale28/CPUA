@@ -1,0 +1,134 @@
+// arg: 0000
+// ret: 0001
+
+// Initialize stack pointer
+// Stack Pointer: 512word = 8192 bit
+// Stack begins from: 513word = 8208 bit
+          LDA #8028
+          STA #8192
+
+
+// ---------- stack head
+// argument(n)
+// ----------
+// fib(n-1)
+// ----------
+// fib(n-2)
+// ----------
+// return
+// ----------
+// pc+2
+// ----------
+
+fib:
+
+          // save argument into stack
+          LDA #0000
+          STA 8192
+
+          // advance stack pointer to pc+2
+          LDA #8192
+          ADA #5
+          STA #8192
+
+          // if( n == 0 )
+          LDA #0000
+          JZ retone
+
+          // if( n == 1 )
+          SUA #1
+          JZ retone
+
+          // ==== fib(n-1) ====
+          LDA #0000
+          SUA #1
+          STA #0000
+          // ---- save pc+2 ----
+          // get back stack pointer
+          LDA #8192
+          SUA #1
+          STA #8192
+          // save pc+2 into stack
+          LDA #fibn1
+          ADA #2
+          STA 8192
+          //advance stack pointer
+          LDA #8192
+          ADA #1
+          STA #8192
+fibn1:    JUMP fib
+
+          // ==== save fib(n-1)_ ====
+          // get back stack pointer
+          LDA #8192
+          SUA #4
+          STA #8192
+          // load ret: 0001 and save
+          LDA #0001
+          STA 8192
+          // advance stack pointer
+          LDA #8192
+          ADA #4
+          STA #8192
+
+          // ==== fib(n-2) ====
+          // get arg
+          // get back stack pointer
+          LDA #8192
+          SUA #5
+          STA 8192
+          SUA #2
+          STA #0000
+          // advance stack pointer
+          LDA #8192
+          ADA #5
+          STA 8192
+          // --save pc+1 --
+          LDA #8192
+          SUA #1
+          STA #8192
+          // save pc+2 into stack
+          LDA #fibn2
+          ADA #2
+          STA 8192
+          //advance stack pointer
+          LDA #8192
+          ADA #1
+          STA #8192
+fibn2:     JUMP fib
+          // ==== save fib(n-2)_ ====
+          // get back stack pointer
+          LDA #8192
+          SUA #3
+          STA #8192
+          // load ret: 0001 and save
+          LDA #0001
+          STA 8192
+          // advance stack pointer
+          LDA #8192
+          ADA #3
+          STA #8192
+
+          // calculate return value
+          // get back stack pointer
+          LDA #8192
+          SUA #4
+          STA #8192
+          // load and save return
+          LDA 8192
+          STA #0001
+          //advance stack pointer to fib(n-2)
+          LDA #8192
+          ADA #1
+          STA #8192
+          // load and add return
+          LDA 8192
+          ADA 0001
+          STA #0001
+          
+
+
+retone:
+          LDA #8192
+
+
