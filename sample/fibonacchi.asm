@@ -4,6 +4,7 @@
 // 0003: t1
 // 0004: sp
 // 0005: ra
+//
 // 0512: stack
 
 // -----------------
@@ -69,25 +70,60 @@ FIB:
           JZ case_one
           JUMP #L1
 case_zero:
-          ori $v0, $zero, 0
-          addi $sp, $sp, 12
-          jr $ra
+          //ori $v0, $zero, 0
+          LDA #0
+          STA #0001
+          //addi $sp, $sp, 12
+          LDA 0004
+          SUA #3
+          STA #0004
+          //jr $ra
+          JUMP 0005
 case_one:
           ori $v0, $zero, 1
-          addi $sp, $sp, 12
-          jr $ra
+          LDA #1
+          STA #0001
+          //addi $sp, $sp, 12
+          LDA 0004
+          SUA #3
+          STA #0004
+          //jr $ra
+          JUMP 0005
 
 L1:
-          addi $a0, $a0, -1
-          jal FIB
+          //addi $a0, $a0, -1
+          LDA 0000
+          SUA 1
+          STA #0000
+          //jal FIB
+          LDA #L1_1
+          STA #0005
+          JUMP #FIB
+L1_1:
           add $t1, $v0, $zero
-          addi $a0, $a0, -1
-          jal FIB
-          add $v0, $v0, $t1
-
-          lw $a0, 0($sp)
-          lw $ra, 4($sp)
-          lw $t1, 8($sp)
-          addi $sp, $sp, 12
+          LDA 0001
+          STA #0003
+          //addi $a0, $a0, -1
+          LDA 0000
+          SUA 1
+          //jal FIB
+          LDA #L1_2
+          STA #0004
+          JUMP #FIB
+L1_2:
+          //add $v0, $v0, $t1
+          LDA 0001
+          ADA 0003
+          STA #0001
+          //lw $a0, 0($sp)
+          // decrease stack pointer
+          LDA 0004
+          SUA #1
+          STA #0004
+          // load and save
           
-          jr $ra
+          //lw $ra, 4($sp)
+          //lw $t1, 8($sp)
+          //addi $sp, $sp, 12
+          
+          //jr $ra
