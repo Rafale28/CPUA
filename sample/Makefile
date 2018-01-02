@@ -2,12 +2,17 @@ SRCDIR=.
 ASMDIR=$(SRCDIR)/../assembler/obj
 CPUDIR=$(SRCDIR)/../DE0_CV/
 ASM=$(ASMDIR)/assembler
-%.sim:
-	$(ASM) $*.asm
-	cp dump.hex $(CPUDIR)/program.hex
+%.run:
 	cd $(CPUDIR);make CPUA.vsim
 
+%.sim: %.hex
+	cp $*.hex $(CPUDIR)/program.hex
+	cd $(CPUDIR);make CPUA.vsim
+
+%.hex: %.asm
+	$(ASM) $*.asm
+
 clean:
-	rm dump.hex
+	-rm *.hex
 	cd $(CPUDIR);rm program.hex
 	cd $(CPUDIR);make clean
