@@ -132,7 +132,7 @@ V$(TARGET): V$(TARGET).h
 $(TARGET).vvp: $(TARGET)_sim.v $(SIMVFILES)
 	iverilog -o $@ $^
 
-$(TARGET)_sim.vcd: $(TARGET).vvp
+$(TARGET)_sim.vcd: $(TARGET).vvp program.hex
 	vvp $<
 
 gtkwave:$(TARGET)_sim.vcd
