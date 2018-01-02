@@ -47,6 +47,7 @@ module CPUA {
 	proc_name decode (OP);
 	proc_name memread (IM);
 	proc_name execution (IM);
+  proc_name memaddread(IM);
 
 //////////debug signal///////////////////////////////////	
 	cpuen = ~ifetch & ~decode & ~memread & ~execution;
@@ -83,21 +84,29 @@ module CPUA {
 	}
 	proc execution {
 		wire jmp[16];
-		alt {
-			OP[14:12]==3'h1:{rA:=alu0.exe(OP[3:0],rA,IM);rZ:=alu0.outZ;}
-			OP[14:12]==3'h2:{
-				alt {
-					OP[11:4]==0x00:jmp=IM;
-					OP[11:4]==0x10:{if(rZ)jmp=IM;else jmp=PC;}
-					OP[11:4]==0x01:{jmp=IM;ST:=PC;}
-				}
-				PC:=jmp;
-			}
-			OP[14:12]==3'h3:memory_write(IM,rA);
-			OP[14:12]==3'h4:PC:=ST;
-		}
-		ifetch();
-	}
+    if(OP==16'hD000){
+        memaddread(memory_read(rA));
+    }else{
+      alt {
+        OP[14:12]==3'h1:{rA:=alu0.exe(OP[3:0],rA,IM);rZ:=alu0.outZ;}
+        OP[14:12]==3'h2:{
+          alt {
+            OP[11:4]==0x00:jmp=IM;
+            OP[11:4]==0x10:{if(rZ)jmp=IM;else jmp=PC;}
+            OP[11:4]==0x01:{jmp=IM;ST:=PC;}
+          }
+          PC:=jmp;
+        }
+        OP[14:12]==3'h3:memory_write(IM,rA);
+        OP[14:12]==3'h4:PC:=ST;
+      }
+      ifetch();
+    }
+  }
+  proc memaddread {
+    rA:=IM;
+    ifetch();
+  }
 }
 module SHIFT16 {
 	wire s0[16];

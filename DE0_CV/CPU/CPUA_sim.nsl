@@ -1,5 +1,5 @@
 #include "CPUA.inc"
-#define MAXSIM 1000
+#define MAXSIM 100000
 
 declare CPUA_sim simulation{}
 declare ram interface{
