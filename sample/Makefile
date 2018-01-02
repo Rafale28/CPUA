@@ -9,8 +9,8 @@ ASM=$(ASMDIR)/assembler
 	cp $*.hex $(CPUDIR)/program.hex
 	cd $(CPUDIR);make CPUA.vsim
 
-%.hex: %.asm
-	$(ASM) $*.asm
+%.hex: %/src.asm
+	$(ASM) $*/src.asm $*.hex
 
 clean:
 	-rm *.hex
