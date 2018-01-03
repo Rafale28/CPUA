@@ -1,5 +1,5 @@
 # CPUA
-## Operators
+## Instructions
 |   Instruction   | z |   OPCODE   |     Operation                      |
 |:----------------|:-:|:----------:|:-----------------------------------|
 | LDA #xxx        | X | 1002       | A := xxx                           |

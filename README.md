@@ -1,5 +1,8 @@
 # CPUA
-## Operators
+## Description
+CPUA is a simple CPU.
+
+## Instructions
 |   Instruction   | z |   OPCODE   |     Operation                      |
 |:----------------|:-:|:----------:|:-----------------------------------|
 | LDA #xxx        | X | 1002       | A := xxx                           |
@@ -33,6 +36,6 @@
 | JZ  xxx         |   | A102       | PC := (xxx) if Z==1 else PC := PC+2|
 | CALL xxx        |   | A012       | PC := (xxx), ST := PC+2            |
 | STA xxx         |   | B000       | ((xxx)) := A                       |
-| LAA xxx         | X | D000       | A := ((xxx))                       |
+| LAA xxx         | X | D000       | A := (A)                           |
 
-xxx with bracket means it fetches a memory value at the address xxx.
+A value with brackets means it fetches a memory value at the address xxx.
