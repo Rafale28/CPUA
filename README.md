@@ -1,5 +1,8 @@
 # CPUA
-## Operators
+## Description
+CPUA is a simple CPU.
+
+## Instructions
 |   Instruction   | z |   OPCODE   |     Operation                      |
 |:----------------|:-:|:----------:|:-----------------------------------|
 | LDA #xxx        | X | 1002       | A := xxx                           |
