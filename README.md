@@ -1,4 +1,7 @@
 # CPUA
+## Description
+CPUA is a simple CPU.
+
 ## Instructions
 |   Instruction   | z |   OPCODE   |     Operation                      |
 |:----------------|:-:|:----------:|:-----------------------------------|
